@@ -1,3 +1,3 @@
-module RapidJob
-  VERSION = "0.0.2"
+module Rapid
+  VERSION = "0.0.3"
 end

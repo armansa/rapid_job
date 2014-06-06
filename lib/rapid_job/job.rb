@@ -1,54 +1,40 @@
-module RapidJob
-  class Job
-    def metaclass
-      class << self; self; end
-    end
+module Rapid
+  module Job
+		def self.included(base)
+			base.send(:extend, ClassMethods)
+		end
 
-    def initialize type, content, attr
-      @queue = attr[:queue] || 'default'
-      @persisted = attr[:persisted]==false ? false : true
-      @publish = attr[:publish] || false
-      @queue_ttl = attr[:queue_ttl] || nil
-      @message_ttl = attr[:message_ttl] || nil
-      #    @dead_letter = attr[:dead_letter]
-      #    @heart_beat = attr[:heart_beat]
-      #    @run_at = attr[:run_at] || nil
+	  module ClassMethods
 
-      @max_attempts = attr[:max_attempts] || 1
-      @attempt_counter = 0
-      @content = content
-      @type = type
-    end
+			def rapid attr={}
+				job = Rapid::Task.new self.to_s, nil, attr
+				methods = self.public_methods - self.superclass.methods
+				methods.each do |method_name|
+					job.metaclass.send(:define_method, method_name) do |*args|
+						self.method_name= method_name
+						self.args= args
+						self.enqueue
+						self
+					end
+				end
+				job
+			end
 
-    def args= args
-      @args = args
-    end
+		end
 
-    def method_name= method_name
-      @method_name = method_name
-    end
+		def rapid attr={}
+			job = Rapid::Task.new self.class.to_s, self.to_json, attr
+			methods = self.public_methods - self.class.superclass.instance_methods
+			methods.each do |method_name|
+				job.metaclass.send(:define_method, method_name) do |*args|
+					self.method_name= method_name
+					self.args= args
+					self.enqueue
+					self
+				end
+			end
+			job
+		end
 
-    def to_json
-      {
-        max_attempts: @max_attempts,
-        attempt_counter: @attempt_counter,
-        type: @type,
-        content: @content,
-        method_name: @method_name,
-        args: @args,
-      }.to_json
-    end
-
-    def enqueue
-  #    if @queue_ttl
-  #      q = $mq_channel.queue(@queue, :durable => @persisted, :arguments => { "x-message-ttl" => @queue_ttl }) unless @publish
-  #      q = $mq_channel.fanout(@queue, :durable => @persisted, :arguments => { "x-message-ttl" => @queue_ttl }) if @publish
-  #    else
-        q = $mq_channel.queue(@queue, :durable => @persisted)# unless @publish
-  #      q = $mq_channel.fanout(@queue, :durable => @persisted) if @publish
-  #    end
-  #    q.publish(self.to_json, :persisted => @persisted, :arguments => { "x-message-ttl" => @queue_ttl }) if @message_ttl
-      q.publish(self.to_json, :persisted => @persisted)# if @message_ttl.nil?
-    end
-  end
+	end
 end

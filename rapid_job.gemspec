@@ -5,7 +5,7 @@ require 'rapid_job/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "rapid_job"
-  spec.version       = RapidJob::VERSION
+  spec.version       = Rapid::VERSION
   spec.authors       = ["Arman Sarrafi"]
   spec.email         = ["arman.zrb@gmail.com"]
   spec.description   = %q{RapidJob is a RabbitMQ-backed Ruby library for creating background jobs, placing them on multiple queues, and processing them rapidly.}
@@ -19,8 +19,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "bundler", "~> 1.3"
-  spec.add_development_dependency "rake"
-  spec.add_development_dependency "bunny"
-  spec.add_development_dependency "amqp"
-  spec.add_development_dependency "json"
+  spec.add_dependency "rake"
+  spec.add_dependency "amqp"
+  spec.add_dependency "json"
+	spec.add_dependency "bunny", "~> 1.2.1"
 end
