@@ -3,6 +3,7 @@ require "bunny"
 require "rapid_job/version"
 require "rapid_job/job"
 require "rapid_job/task"
+require 'rapid_job/railtie' if defined?(Rails)
 
 module Rapid
   class << self
